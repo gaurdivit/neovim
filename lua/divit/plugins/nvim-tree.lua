@@ -1,91 +1,56 @@
-local status_ok, nvimtree = pcall(require, "nvim-tree")
-if not status_ok then
-	return
-end
+return {
+  "nvim-tree/nvim-tree.lua",
+  dependencies = "nvim-tree/nvim-web-devicons",
+  config = function()
+    local nvimtree = require("nvim-tree")
 
--- local tree_cb = nvim_tree_config.nvim_tree_callback
+    -- recommended settings from nvim-tree documentation
+    vim.g.loaded_netrw = 1
+    vim.g.loaded_netrwPlugin = 1
 
-local function open_nvim_tree(data)
-	-- buffer is a [No Name]
-	local no_name = data.file == "" and vim.bo[data.buf].buftype == ""
+    nvimtree.setup({
+      view = {
+        width = 34,
+        relativenumber = true,
+      },
+      -- change folder arrow icons
+      renderer = {
+        indent_markers = {
+          enable = true,
+        },
+        icons = {
+          glyphs = {
+            folder = {
+              arrow_closed = "", -- arrow when folder is closed
+              arrow_open = "", -- arrow when folder is open
+            },
+          },
+        },
+      },
+      -- disable window_picker for
+      -- explorer to work well with
+      -- window splits
+      actions = {
+        open_file = {
+          window_picker = {
+            enable = false,
+          },
+        },
+      },
+      filters = {
+        custom = { ".DS_Store" },
+      },
+      git = {
+        ignore = false,
+      },
+    })
 
-	-- buffer is a directory
-	local directory = vim.fn.isdirectory(data.file) == 1
+    -- set keymaps
+    local keymap = vim.keymap -- for conciseness
 
-	if not no_name and not directory then
-		return
-	end
-
-	-- change to the directory
-	if directory then
-		vim.cmd.cd(data.file)
-	end
-
-	-- open the tree
-	require("nvim-tree.api").tree.open()
-end
-
-vim.api.nvim_create_autocmd({ "VimEnter" }, { callback = open_nvim_tree })
-
--- recommended settings from nvim-tree documentation
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
-
--- change color for arrows in tree to light blue
-vim.cmd([[ highlight NvimTreeIndentMarker guifg=#3FC5FF ]])
-
---[[ nvim_tree.setup({ ]]
-require("nvim-tree").setup({
-	update_focused_file = {
-		enable = true,
-		update_cwd = true,
-	},
-	renderer = {
-		root_folder_modifier = ":t",
-		icons = {
-			glyphs = {
-				default = "",
-				symlink = "",
-				folder = {
-					arrow_closed = "", -- arrow when folder is closed
-					arrow_open = "", -- arrow when folder is open					default = "",
-					open = "",
-					empty = "",
-					empty_open = "",
-					symlink = "",
-					symlink_open = "",
-				},
-				git = {
-					-- unstaged = "",
-					staged = "S",
-					unmerged = "",
-					renamed = "➜",
-					untracked = "U",
-					deleted = "",
-					ignored = "◌",
-				},
-			},
-		},
-	},
-	diagnostics = {
-		enable = true,
-		show_on_dirs = true,
-		icons = {
-			hint = "",
-			info = "",
-			warning = "",
-			error = "",
-		},
-	},
-	view = {
-		width = 20,
-		side = "left",
-		-- 	mappings = {
-		-- 		list = {
-		-- 			{ key = { "l", "<CR>", "o" }, cb = tree_cb("edit") },
-		-- 			{ key = "h", cb = tree_cb("close_node") },
-		-- 			{ key = "v", cb = tree_cb("vsplit") },
-		-- 		},
-		-- 	},
-	},
-})
+    keymap.set("n", "<leader>ee", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle file explorer" }) -- toggle file explorer
+    keymap.set("n", "<leader>ef", "<cmd>NvimTreeFindFileToggle<CR>", { desc = "Toggle file explorer on current file" }) -- toggle file explorer on current file
+    keymap.set("n", "<leader>ec", "<cmd>NvimTreeCollapse<CR>", { desc = "Collapse file explorer" }) -- collapse file explorer
+    keymap.set("n", "<leader>er", "<cmd>NvimTreeRefresh<CR>", { desc = "Refresh file explorer" }) -- refresh file explorer
+  end,
+}

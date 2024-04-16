@@ -1,3 +1,0 @@
-# nvim
-
-dotfiles for nvim
